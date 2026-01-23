@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+body, html {
+    height: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Averia Serif Libre';
+    background-image: url(https://images.unsplash.com/photo-1661852830795-e8dab13f51f4?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+    background-size: cover;
+}
+header {
+    background-color: #3d729e;
+    border-bottom: 2px solid black;
+}
+nav {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+}
+button {
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+    text-transform: capitalize;
+    font-family: 'Averia Serif Libre';
+    background-color: #c1cad3;
+    font-size: 1rem;
+    border: 2px solid black;
+}
+button:hover {
+    background-color: #749bba;
+    cursor: pointer;
+}
+.heading {
+    font-size: 5rem;
+}
+.title {
+    font-size: 3rem;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.heading-content {
+    padding: 20px;
+    width: 250px;
+    font-size: 1.2rem;
+}
+.content {
+    font-size: 1.2rem;
+}
+.review-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.standard-review {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.review-content {
+    font-style: italic;
+}
+.name {
+    align-self: flex-end;
+}
