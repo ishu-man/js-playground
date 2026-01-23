@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Array Cardio 💪</title>
+  <link rel="icon" href="https://fav.farm/🔥" />
+</head>
+<body>
+  <p><em>Psst: have a look at the JavaScript Console</em> 💁</p>
+  <script>
+    // Get your shorts on - this is an array workout!
+    // ## Array Cardio Day 1
+
+    // Some data we can work with
+
+    const inventors = [
+      { first: 'Albert', last: 'Einstein', year: 1879, passed: 1955 },
+      { first: 'Isaac', last: 'Newton', year: 1643, passed: 1727 },
+      { first: 'Galileo', last: 'Galilei', year: 1564, passed: 1642 },
+      { first: 'Marie', last: 'Curie', year: 1867, passed: 1934 },
+      { first: 'Johannes', last: 'Kepler', year: 1571, passed: 1630 },
+      { first: 'Nicolaus', last: 'Copernicus', year: 1473, passed: 1543 },
+      { first: 'Max', last: 'Planck', year: 1858, passed: 1947 },
+      { first: 'Katherine', last: 'Blodgett', year: 1898, passed: 1979 },
+      { first: 'Ada', last: 'Lovelace', year: 1815, passed: 1852 },
+      { first: 'Sarah E.', last: 'Goode', year: 1855, passed: 1905 },
+      { first: 'Lise', last: 'Meitner', year: 1878, passed: 1968 },
+      { first: 'Hanna', last: 'Hammarström', year: 1829, passed: 1909 }
+    ];
+
+    const people = [
+      'Bernhard, Sandra', 'Bethea, Erin', 'Becker, Carl', 'Bentsen, Lloyd', 'Beckett, Samuel', 'Blake, William', 'Berger, Ric', 'Beddoes, Mick', 'Beethoven, Ludwig',
+      'Belloc, Hilaire', 'Begin, Menachem', 'Bellow, Saul', 'Benchley, Robert', 'Blair, Robert', 'Benenson, Peter', 'Benjamin, Walter', 'Berlin, Irving',
+      'Benn, Tony', 'Benson, Leana', 'Bent, Silas', 'Berle, Milton', 'Berry, Halle', 'Biko, Steve', 'Beck, Glenn', 'Bergman, Ingmar', 'Black, Elk', 'Berio, Luciano',
+      'Berne, Eric', 'Berra, Yogi', 'Berry, Wendell', 'Bevan, Aneurin', 'Ben-Gurion, David', 'Bevel, Ken', 'Biden, Joseph', 'Bennington, Chester', 'Bierce, Ambrose',
+      'Billings, Josh', 'Birrell, Augustine', 'Blair, Tony', 'Beecher, Henry', 'Biondo, Frank'
+    ];
+    
+    // Array.prototype.filter()
+    // 1. Filter the list of inventors for those who were born in the 1500's
+    const result = inventors.filter(
+      function(inventorInfo) {
+        return ((Number(inventorInfo.year) >= 1500) && (Number(inventorInfo.year) <= 1600))
+      }
+    );
+    console.log(result);
+    console.table(result);
+
+    // Array.prototype.map()
+    // 2. Give us an array of the inventors first and last names
+    const firstAndLastNamesArray = inventors.map((inventorInfo) => {
+      const fullName = `${inventorInfo.first} ${inventorInfo.last}`;
+      return fullName;
+    })
+
+    console.log(firstAndLastNamesArray);
+    console.table(firstAndLastNamesArray);
+
+
+    // Array.prototype.sort()
+    // 3. Sort the inventors by birthdate, oldest to youngest
+
+    // The end goal is to display the names and other info of the inventors in oldest to youngest order.
+
+    // function compareBirthdate(first, second) {
+
+    //   // negative: first before second
+    //   // positive: second before first
+
+    //   if(Number(first.year) > Number(second.year)) {
+    //     return 1;
+    //   }
+    //   else if (Number(first.year) < Number(second.year)) {
+    //     return -1;
+    //   }
+    //   return 0;
+    // }
+
+    inventors.sort((a, b) => (a.year > b.year) ? 1 : -1);
+    console.table(inventors);
+
+
+    // Array.prototype.reduce()
+    // 4. How many years did all the inventors live all together?
+
+    // accumulator is the value resulting from previous function call - the accumulated value or the total.
+    // it can either be initialValue (supplied by user) or array[0]; init value is passed as a second argument. 
+    function reducer(accumulator, currentValue) {
+      console.log(`Accumulator: ${accumulator}`);
+      console.log(`New age value: ${(Number(currentValue.passed) - Number(currentValue.year))}, belongs to ${currentValue.last}`)
+      return accumulator + (Number(currentValue.passed) - Number(currentValue.year));
+    }
+    const sum = inventors.reduce(reducer, 0);
+    console.log(sum);
+
+    // 5. Sort the inventors by years lived
+    function compareYearsLived(firstObject, secondObject) {
+      const yearsLivedOne = Number(firstObject.passed) - Number(firstObject.year);
+      const yearsLivedTwo = Number(secondObject.passed) - Number(secondObject.year);
+
+      if (yearsLivedOne > yearsLivedTwo) {
+        return -1; // for asc to desc
+      }
+      else if (yearsLivedOne < yearsLivedTwo) {
+        return 1; // yes, sort it (hence positive)
+      }
+      return 0;
+    }
+
+    inventors.sort(compareYearsLived);
+    console.table(inventors);
+
+    // 6. create a list of Boulevards in Paris that contain 'de' anywhere in the name
+    // https://en.wikipedia.org/wiki/Category:Boulevards_in_Paris
+    // const category = document.querySelector('.mw-category');
+    // const links = category.querySelectorAll('a'); 
+
+    // // yes, querySelectorAll works with individual DOM elements as well.
+
+    // // const list = []; 
+    // // for (node of links) {
+    // //   list.push(node.title);
+    // // } 
+
+    // // better method to get array from nodelist:
+    // const list = Array.from(links);
+    // function containsDE(name) {
+    //   return name.includes("de");
+    // } 
+    // list.filter(containsDE); 
+
+    // 7. sort Exercise
+    // Sort the people alphabetically by last name
+    function sortPeople(name1, name2) {
+      const array1 = name1.split(", ");
+      const lastName1 = array1[0];
+      console.log(`Last name 1 is ${lastName1}`);
+
+      const array2 = name2.split(", ");
+      const lastName2 = array2[0];
+      console.log(`Last name 2 is ${lastName2}`);
+
+      if (lastName1 > lastName2) {
+        return 1;
+      }
+      else if (lastName1 < lastName2) {
+        return -1;
+      }
+      return 0;
+    }
+
+    people.sort(sortPeople);
+    console.table(people);
+
+    // 8. Reduce Exercise
+    // Sum up the instances of each of these
+    const data = ['car', 'car', 'truck', 'truck', 'bike', 'walk', 'car', 'van', 'bike', 'walk', 'car', 'van', 'car', 'truck' ];
+    // what you have to do is tell them that car occurs this many times or truck occurs this many times.
+
+    // what you can do is use reduce which returns a single entity - could be an object
+    // the accumulator or the total can also be initialised to an object like below
+
+    const initialObject = {}
+
+    function dataReducer(total, currentValue) {
+      // if there is no key with that value initialise it to 0 (ex. { 'car': 0 })
+      // otherwise increment it by 1
+      if (!total[currentValue]) {
+        total[currentValue] = 0;
+      }
+      total[currentValue] += 1;
+      return total;
+    }
+
+    const finalObject = data.reduce(dataReducer, initialObject)
+    console.log(finalObject);
+
+  </script>
+</body>
+</html>
