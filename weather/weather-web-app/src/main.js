@@ -1,11 +1,17 @@
 const API_KEY = import.meta.env.VITE_API_KEY
+let fetched = false;
 
 async function returnLocationData(location){
+    handleLoadingState(fetched);
     let promise = await fetch(`https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?unitGroup=us&key=${API_KEY}&contentType=json`);
     // console.log(promise);
-    let data = await promise.json();
-    // console.log(data);
-    return data; // this is an object that would need to be formatted later
+    try {
+        let data = await promise.json();
+        // console.log(data);
+        return data; // this is an object that would need to be formatted later
+    } catch (error) {
+        handleErrorState(error);
+    }
 }
 
 function returnCelsius(fahrenheit){
@@ -21,10 +27,14 @@ function capitalizeInput(finalString, currentString){
 async function processJSON(JSONdata) {
     const {description, currentConditions, address} = JSONdata;
     const {cloudcover, conditions, datetime, temp, feelslike} = currentConditions;
+    fetched = true;
 
     const app = document.querySelector('#app');
+    console.log(app);
     const parentContainer = document.querySelector('.parent-container');
     const childContainer = document.querySelector('.child-container');
+    handleErrorState(0);
+    handleLoadingState(fetched);
 
         const temperature = document.createElement('div');
         temperature.id = "temperature";
@@ -48,6 +58,7 @@ async function processJSON(JSONdata) {
 
         childContainer.append(temperature, feelsLikeTemp, descriptionEle, cloudcoverEle, conditionsEle);
         parentContainer.appendChild(childContainer);
+    fetched = false;
 
 }
 
@@ -78,6 +89,34 @@ function initialize() {
         childContainer.innerHTML = "";
         // console.log(input.value);
         returnLocationData(input.value).then((data) => processJSON(data))
+    }
+}
+
+function handleLoadingState(fetched) {
+    const app = document.querySelector('#app');
+    const existingLoadingState = document.querySelector('.loading');
+    if (existingLoadingState) app.removeChild(existingLoadingState);
+    const loading = document.createElement('div');
+    loading.textContent = "Loading..."
+    loading.classList.add('loading');
+
+    if (fetched == false) app.appendChild(loading);
+}
+
+function handleErrorState(error) {
+    /**
+     * In its current state the function is just bad, it's a mock error handler
+     * An ideal version would perhaps be a component message that can act for both loading and error states
+     * This is something I would implement in react.
+     */
+    const app = document.querySelector('#app');
+    const existingError= document.querySelector('.error');
+    if (existingError) app.removeChild(existingError);
+    if (error) {
+        const errorMessage = document.createElement('div');
+        errorMessage.textContent = "There was an error!";
+        errorMessage.classList.add('error');
+        app.appendChild(errorMessage);
     }
 }
 
