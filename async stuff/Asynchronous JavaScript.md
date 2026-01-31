@@ -40,20 +40,20 @@ Look into my code example for this for `Promise.all()` and `Promise.race()`.
 JS is a single threaded programming language which means that it's got a single call stack - only a single thing can run at a time - if not for the webapis!
 The call stack is basically a data structure that records where in the program you are. It is a stack for function calls. Blocking the call stack means writing synchronous calls that might take forever, like network requests.
 
-How does the event loop interact with a web API like `settimeout`?
+What happens when I call a web API like `settimeout`?
 Essentially, when a line of code executes, there's this thing known as the mighty event loop, which from my python async knowledge is an infinite loop that looks for tasks to be executed. When I call `settimeout`, the **task queue** or the **callback queue** gets fed the call.
 
 _The event loop's job is to look at the task queue and look at my call stack. If my stack is empty, it takes the first thing on the queue and pushes it to the stack._ 
 
 `settimeout` is a callback based API - so it enters the task queue. The task queue holds web API callbacks and event handlers to be executed sometime in the future.
-The `timer` would be handled by the browser, so 1, 2, 3, 4, 5... if the call stack was empty, you `settimeout` executes. 
+The `timer` would be handled by the browser, so 1, 2, 3, 4, 5... if the call stack was empty, your `settimeout` executes. 
 Thus, the time you put in there is not definite - it's simply the time it takes for it to go from the task queue to the call stack, which may be larger or smaller than what you've fed it based on what the call stack holds right now. Maybe you wrote some other code that could slow this down.
 By the way, this is what `settimeout(0)` does - it defers execution until the stack is clear. Do you get it? Try this:
 ```javascript
 console.log('This is the start');
 settimeout( () => {
 	console.log('This is inside the settimeout');
-}5000);
+}0);
 console.log('This is the end');
 ```
 The output would be:
@@ -68,6 +68,7 @@ See how clever that was? The event loop sent the callback inside the task (or ca
 Building on my previous definition of a callback, here we are more concerned with asynchronous callbacks instead of synchronous ones.
 
 **Microtask queue**
+
 `fetch` is a promise based web API which menas that it uses the microtask queue which gets *higher* priority than the task queue by the event loop. Examples of stuff that ends up in the microtask queue - good old `then` `catch` `finally`.
 
 The microtask queue is reserved for asynchronous calls and promise based APIs while the task queue is reserved for callback based APIs - like `settimeout`.
@@ -79,8 +80,8 @@ The `async` keyword before a function has two effects:
 So, when a function is declared with `async`, it automatically returns a promise; returning in an `async` function is the same as resolving a promise. Likewise, throwing an error will reject the promise.
 
 The `await` keyword before a promise makes JavaScript wait until that promise settles, and then:
-3. If it’s an error, an exception is generated — same as if `throw error` were called at that very place. Using `try catch` is recommended. If you're not doing that you can just `catch` an error from a promise returned by the function itself.
-4. Otherwise, it returns the result.
+- If it’s an error, an exception is generated — same as if `throw error` were called at that very place. Using `try catch` is recommended. If you're not doing that you can just `catch` an error from a promise returned by the function itself.
+- Otherwise, it returns the result.
 
 Together they provide a great framework to write asynchronous code that is easy to both read and write.
 
