@@ -41,13 +41,16 @@ JS is a single threaded programming language which means that it's got a single 
 The call stack is basically a data structure that records where in the program you are. It is a stack for function calls. Blocking the call stack means writing synchronous calls that might take forever, like network requests.
 
 What happens when I call a web API like `settimeout`?
+
 Essentially, when a line of code executes, there's this thing known as the mighty event loop, which from my python async knowledge is an infinite loop that looks for tasks to be executed. When I call `settimeout`, the **task queue** or the **callback queue** gets fed the call.
 
 _The event loop's job is to look at the task queue and look at my call stack. If my stack is empty, it takes the first thing on the queue and pushes it to the stack._ 
 
 `settimeout` is a callback based API - so it enters the task queue. The task queue holds web API callbacks and event handlers to be executed sometime in the future.
 The `timer` would be handled by the browser, so 1, 2, 3, 4, 5... if the call stack was empty, your `settimeout` executes. 
+
 Thus, the time you put in there is not definite - it's simply the time it takes for it to go from the task queue to the call stack, which may be larger or smaller than what you've fed it based on what the call stack holds right now. Maybe you wrote some other code that could slow this down.
+
 By the way, this is what `settimeout(0)` does - it defers execution until the stack is clear. Do you get it? Try this:
 ```javascript
 console.log('This is the start');
