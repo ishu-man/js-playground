@@ -93,6 +93,7 @@ function initialize() {
 }
 
 function handleLoadingState(fetched) {
+    // should probably be activated based on network speeds? as per odin suggestion
     const app = document.querySelector('#app');
     const existingLoadingState = document.querySelector('.loading');
     if (existingLoadingState) app.removeChild(existingLoadingState);
