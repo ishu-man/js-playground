@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+body {
+    background-color: #f2f6f7;
+    /* find a way to do this in tailwind */
+}
+
+@theme {
+  --font-display: "Arial", "sans-serif";
+
+}
+
+.form-element {
+    /* grey boxes around the individual fields? */
+    @apply flex flex-col gap-1 p-1;
+}
+
+.submit {
+    /* border radius in tailwind? */
+    @apply bg-green-600 text-2xl p-2 border-emerald-900 border-2 cursor-pointer w-30;
+}
+
+.edit{
+    /* border radius in tailwind? */
+    @apply bg-blue-600 text-2xl p-2 border-blue-900 border-2 cursor-pointer w-30;
+}
