@@ -18,9 +18,9 @@ function PersonalSection() {
 
     if (editingView) {
         return (
-            <div>
+            <div className="ml-10">
                 <h2 className="font-bold text-5xl mt-5 mb-2 text-gray-700 ">Personal details</h2>
-                <p className="font-light text-2xl mb-3 text-gray-600">Add some details about yourself here</p>
+                <p className="font-light text-2xl mb-5 text-gray-600">Add some details about yourself here</p>
                 <FormSection setterProps={ {setFirstName, setLastName, setEmail, setPhone, setCity, setCountry} } previousValues={ {firstName, lastName, email, phone, city, country} }></FormSection>
                 <ButtonsSection handleEditClick={()=> setEditingView(true)} handleSubmitClick={() => setEditingView(false)}></ButtonsSection>
             </div>
@@ -28,29 +28,29 @@ function PersonalSection() {
     }
 
     return (
-        <div>
+        <div className="ml-10">
             <h2 className="font-bold text-5xl mt-5 mb-2 text-gray-700 ">Personal details</h2>
             <p className="font-light text-2xl mb-3 text-gray-600">Add some details about yourself here</p>
             <div className="grid grid-cols-2 gap-4 max-w-7xl mb-2">
                 <div className="form-element">
                     <p className="text-2xl font-medium text-gray-800">First name</p>
-                    <p className="text-2xl font-thin italic text-gray-800">{firstName}</p>
+                    <p className="submitted-stuff"> ↪ {firstName}</p>
                 </div>
                 <div className="form-element">
                     <p className="text-2xl font-medium text-gray-800">Last name</p>
-                    <p className="text-2xl font-thin italic text-gray-800">{lastName}</p>
+                    <p className="submitted-stuff">↪ {lastName}</p>
                 </div>                <div className="form-element">
                     <p className="text-2xl font-medium text-gray-800">Email</p>
-                    <p className="text-2xl font-thin italic text-gray-800">{email}</p>
+                    <p className="submitted-stuff">↪ {email}</p>
                 </div>                <div className="form-element">
                     <p className="text-2xl font-medium text-gray-800">Phone number</p>
-                    <p className="text-2xl font-thin italic text-gray-800">{phone}</p>
+                    <p className="submitted-stuff">↪ {phone}</p>
                 </div>                <div className="form-element">
                     <p className="text-2xl font-medium text-gray-800">City</p>
-                    <p className="text-2xl font-thin italic text-gray-800">{city}</p>
+                    <p className="submitted-stuff">↪ {city}</p>
                 </div>                <div className="form-element">
                     <p className="text-2xl font-medium text-gray-800">Country</p>
-                    <p className="text-2xl font-thin italic text-gray-800">{country}</p>
+                    <p className="submitted-stuff">↪ {country}</p>
                 </div>
             </div>
             <ButtonsSection handleEditClick={()=> setEditingView(true)} handleSubmitClick={() => setEditingView(false)}></ButtonsSection>
@@ -67,7 +67,7 @@ function FormSection({ setterProps, previousValues }) {
      */
 
     return (
-        <div className="grid grid-cols-2 gap-4 max-w-7xl mb-2">
+        <div className="grid grid-cols-2 gap-4 max-w-7xl mb-5">
             {/* <div className="row"> */}
                 <FormElement elementName="First name" setterProps={setterProps} previousValues={previousValues}></FormElement>
                 <FormElement elementName="Last name" setterProps={setterProps} previousValues={previousValues}></FormElement>
@@ -137,7 +137,7 @@ function FormElement({ elementName, setterProps, previousValues }){
     return (
         <div className="form-element">
             <label htmlFor={elementName} className="text-2xl font-medium text-gray-800">{elementName} </label>
-            <input type={inputType} name={elementName} onChange={handleChange} value={prevVal ? prevVal : ''} className="border-1 border-purple-500 h-9 p-2"/>
+            <input type={inputType} name={elementName} onChange={handleChange} value={prevVal ? prevVal : ''} />
         </div>
     )
 }
@@ -149,9 +149,9 @@ function ButtonsSection({ handleEditClick, handleSubmitClick}){
      */
 
     return (
-        <div className="flex gap-2">
-            <button className="submit" onClick={handleSubmitClick}>SUBMIT</button>
-            <button className="edit" onClick={handleEditClick}>EDIT</button>
+        <div className="flex gap-5 mb-10">
+            <button className="submit" onClick={handleSubmitClick}>Submit</button>
+            <button className="edit" onClick={handleEditClick}>Edit</button>
         </div>
     )
 }

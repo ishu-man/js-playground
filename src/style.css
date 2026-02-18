@@ -1,26 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Space+Grotesk:wght@300..700&display=swap');
 @import "tailwindcss";
+/* some of my preferred fonts */
 
 body {
-    background-color: #f2f6f7;
-    /* find a way to do this in tailwind */
+    @apply bg-neutral-50 font-[Space_Grotesk] text-gray-900 bg-[url(./assets/fabric.png)];
 }
 
 @theme {
   --font-display: "Arial", "sans-serif";
-
 }
 
 .form-element {
-    /* grey boxes around the individual fields? */
     @apply flex flex-col gap-1 p-1;
 }
 
 .submit {
     /* border radius in tailwind? */
-    @apply bg-green-600 text-2xl p-2 border-emerald-900 border-2 cursor-pointer w-30;
+    @apply bg-green-500 text-2xl p-2 cursor-pointer w-30  border-zinc-700 border-2 shadow-lg/10 hover:bg-green-600 font-bold;
 }
 
 .edit{
     /* border radius in tailwind? */
-    @apply bg-blue-600 text-2xl p-2 border-blue-900 border-2 cursor-pointer w-30;
+    @apply bg-blue-500 text-2xl p-2 cursor-pointer w-30 border-zinc-700 border-2 shadow-lg/10 hover:bg-blue-600 font-bold;
+}
+
+input {
+    @apply  text-3xl p-4 border-zinc-800 border-2 ;
+}
+
+.submitted-stuff {
+    @apply text-3xl p-4 italic;
 }
