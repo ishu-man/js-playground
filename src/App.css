@@ -1,5 +1,42 @@
 @import "tailwindcss";
+@theme {
+  --font-projekt: "Projekt Blackbird", sans-serif; 
+  --font-zarathustra: "Zarathustra", sans-serif;
+  --color-dark: #1f1f1f;
+}
+
+@font-face {
+  font-family: "Zarathustra";
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url("/fonts/zarathustra-v01.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Projekt Blackbird";
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url("/fonts/projekt-blackbird.otf") format("opentype");
+}
 
 body, html {
-    @apply bg-amber-200;
+  @apply bg-dark font-projekt text-white;
+}
+
+img {
+  @apply w-64 h-64;
+}
+
+.Card {
+  @apply border-emerald-700 border-3 rounded-md cursor-pointer bg-amber-400 shadow-xs shadow-amber-50 flex-col items-center justify-center;
+}
+
+.cards-grid {
+  @apply grid grid-cols-4 grid-rows-3 gap-4 mt-12;
+}
+
+.center {
+  @apply flex items-center justify-center;
 }
