@@ -9,5 +9,5 @@ createRoot(document.getElementById('root')!).render(
       <p className='text-xl italic max-w-124 text-center mt-3'>a simple memory game based on pokemon cards that definitely didn't take me too long to make!</p>
     </div>
     <App />
-  </StrictMode>,
+  </StrictMode>
 )

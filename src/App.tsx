@@ -1,5 +1,4 @@
 import './App.css'
-import React, {useState, useEffect } from 'react';
 
 type SpritesObject = {
   back_default: string;
@@ -38,16 +37,24 @@ function getRandomInt(max: number) {
 }
 
 function shuffleOrder(cardsArray: Array<Card>) {
-  const other = new Array<Card>();
-  while (other.length !== 12) {
-    const randomInteger = getRandomInt(cardsArray.length);
-    if (cardsArray[randomInteger].appearance_count < 2) {
-      other.push(cardsArray[randomInteger]);
-      cardsArray[randomInteger].appearance_count += 1;
+  /**
+   * My goal for componenet rendering is to literally just shuffle the order of the array. That is the purpose of this
+   * function, and it guarantees the following two things: 
+   * 1. Cards with apperance_count less than two should get a place in the final array, and each card should appear only and at least twice
+   * 2. There should be a random order of the 12 cards in that array.
+   */
+    const newArray = new Array<Card>();
+  while (true) {
+    const random = getRandomInt(cardsArray.length);
+    const currentCard = cardsArray[random];
+    if (currentCard.appearance_count < 2) {
+        newArray.push(currentCard);
+        currentCard.appearance_count += 1;
     }
+    if (newArray.length === 12) break;
   }
 
-  return other;
+  return newArray;
 }
 
 function ScoreCard(scores: Scores){
@@ -72,103 +79,42 @@ function ScoreCard(scores: Scores){
   )
 }
 
-// let's go bottom to top --> clickable card component next. Then cards grid. Then the scoring system.
-
 function ClickableCard({cardData}: {cardData: Card}){
-  // cards array props should be an array of type card.
-
   /**
-   * This is the component for a clickable card.
-   * 
-   * Step 1: Populating this card with fetch feed from the API. For now I will use hardcoded values for all of the cards (rayquaza).
-   * Step 2: Each card should essentially be a button which when clicked records the card ID and other info of the card and saves that for later.
-   * EITHER PASS CARD DATA AS PROPS HERE OR MAKE THE FETCH CALLS HERE ONLY
+   * Props: cardData of type Card
+   * Purpose: Returns a card component based on the aforementioned card data
+   * Insight while writing this: 
+   * Settled on an event handler which is a part of Card's properties. This makes sure that the
+   * parent component gets the data from this card without passing the props too much. The way I achieved this was to use anon functions in a way
+   * that the core logic for the event handler is still defined in the parent, and because the handler is a part of the card's own properties
+   * it was able to be passed as props via CardsGrid and App components.
    */
-
   return (
-     <button className='Card' onClick={() => cardData.onCardClick(cardData.appearance_count, cardData.id)}>
-       <img src={cardData.image} alt="" />
-       <p className='font-bold text-3xl text-black'>{cardData.name}</p>
-     </button>
+    <button className='Card' onClick={() => cardData.onCardClick(cardData.appearance_count, cardData.id)}>
+      <img src={cardData.image} alt="" />
+      <p className='font-bold text-3xl text-black'>{cardData.name}</p>
+    </button>
   )
-
-  // function handleClick(event){
-    // this function should handle the card click by recording the card Id and maybe sending it to some other component? I need to record the card Id for sure
-    // that's what I know for now. 
-    /**
-     * IDEA: Let the parent component control this prop as well. 
-     * It will supply handleClick here which maintains the DS in the parent component itself.
-     * ADVANTAGE: This is literally "lifting the state up" and would help share data with ScoreCard component as props.
-     * also, separation of concerns --> clickablecard is only responsible for painting a clickable card.
-     */
-  // }
 }
 
 function CardsGrid({ cardsArray }: CardsArrayProps){
   /**
-   * What should this get as props? Hmm, it would've been awesome if I had just gotten an array of cards to be made and I just made them magically from
-   * this component. Wait, I can use array.map right? I could just return ClickableCard JSX from this component? Whilst passing unique handleClicks and Ids
-   * and data for each card?
-   * perhaps I could take original cards array as fetched from the API as props here and then use State here to easily set the state for a particular card
-   * as well and array map those to return component JSX.
-   * Props: array of cards
+   * Props: an array of type Card
+   * Purpose: shuffles the prop array to new randomized array and creates card components based on the new array's data
+   * Insight while writing this:
+   * In my initial implementation for this component I had settled on a complex logic for shuffling the cards that involved setting the state
+   * after every time a card is shuffled. I have from hereon switched to a simpler version which makes use of a simple shuffleOrder function
+   * I wrote for this purpose. This approach is simpler than the other and doesn't cause the performance issues introduced by the former.
    */
-
-  // first, I need a random number between 0 and array's size.
-  // then, I would say that my current card is arrayOfCards[randInt]
-  // I would then either set the array to a new thing or push to a new array, randomSelectionOfCards.
-
-  // const [originalArray, setOriginalArray] = useState(cardsArray);
-  // console.log(`Cards arry's first element is: `);
-  // console.log(cardsArray[0]);
-  // let's follow from here: you declare an originalArray that is fed the value of cardsArray.
-
-  // const randomNumber = getRandomInt(originalArray.length);
-  // // you get a random number that has max bounds of current array's length property. Initially, this is 12.
-  // if (originalArray[randomNumber].appearance_count >= 2) {
-
-  //   console.log(`Random number is ${randomNumber} and the associated card is: `);
-  //   console.log(originalArray[randomNumber]);
-  //   console.log(originalArray[randomNumber].appearance_count);
-
-  //   setOriginalArray(originalArray.filter((cardObject) => cardObject.appearance_count < 2))
-  // }
-  // else {
-  //   // randomSelectionOfCards.push(originalArray[randomNumber]);
-  //   // THINK: Do you even need the other array here? PROPOSITION: No! the original array after these modifications would be good to go!
-
-  //   // now comes the juicy part: how will you modify the appearance_count on the current card without setting the state again?
-  //   // originalArray[randomNumber].appearance_count = 2; -- NOT ALLOWED!
-
-
-  //   // in the initial run of this function you get a card whose appearance count is not >= 2 (it's 0 actually)
-  //   // so we arrive here: we replace the original array with a new array where if the cardObject's id is equal to the card at 
-  //   // random number's id we increment the appearance count by 1.
-  //   // the new array would be something of the form (considering only app. counts) = [0, 0, 0, 0, 1, 0, 0, ...];
-  //   setOriginalArray(originalArray.filter((cardObject) => {
-  //     if (cardObject.id === originalArray[randomNumber].id) {
-  //       cardObject.appearance_count += 1
-  //     };
-  //     return cardObject;
-  //   }))
-  // }
-
-  /**
-   * Please remember that your goal during all this exercise is to literally just shuffle the order of the array. Perhaps you should develop a 
-   * function that shuffles the order for you? I literally just want two things guaranteed:
-   * 1. Cards with apperance_count less than two should get a place in the final array with NO REPETITIONS
-   * 2. There should be a random order of the 12 cards in that array.
-   */
-
-  const shuffledArray = shuffleOrder(cardsArray);
-
-  const mappedComponents = shuffledArray.map((currentCard) => {
+  // const shuffledArray = shuffleOrder(cardsArray);
+  // shuffled array is in fact correct.
+  const mappedComponents = cardsArray.map((currentCard) => {
     return (
-      <ClickableCard cardData={currentCard} key={currentCard.id}></ClickableCard>
+      // what should the key be? cause it can't be the ID. Should I let react "handle" it?
+      <ClickableCard cardData={currentCard} ></ClickableCard>
     )
   })
 
-  console.log(mappedComponents);
   return (
     <div className="center">
       <div className="cards-grid">
@@ -176,19 +122,12 @@ function CardsGrid({ cardsArray }: CardsArrayProps){
       </div>
     </div>
   )
-
-  // what I want to do here is to attach a handleClick component to each card which should be controlled by parent App.
-  // the parent should control it so that it can be fed as props to scores component.
-
-  // okay so I've modified the type card -- each card now has its own handleclick attribute
 }
 
 
 function App() {
-  // no deps for now -- using hardcoded value rayquaza for this example
-  // do I need a cleanup function for this?
-  // FOR NOW, POPULATE AN ARRAY WITH 6 CARDS.
 
+  // const myPokemonArray = [384, 644, ]
   // useEffect(() => {
   //   getPokemonSprite("rayquaza").then((pokeJSON) => {
   //     console.log("PokeJSON is as follows:");
@@ -199,12 +138,18 @@ function App() {
   //   return;
   // }, [])
 
+  /**
+   * SOME TODOS:
+   * 1.Implement a neat way to arrange the pokemon IDs (choose 6 of your favorite ones for now) in a data structure and fetch their 
+   * images and information at the time of the mount itself. This should be done only once and shouldn't really update with each render.
+   */
+
   const cardsArray: Array<Card> = [
     {
       id: 1,
       name: "Rayquaza",
       type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
+      image: "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/383.png",
       appearance_count: 0,
       onCardClick: cardClick,
     },
@@ -212,7 +157,7 @@ function App() {
       id: 2,
       name: "Rayquaza",
       type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
+      image: "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/382.png",
       appearance_count: 0,
       onCardClick: cardClick,
     },
@@ -220,7 +165,7 @@ function App() {
       id: 3,
       name: "Rayquaza",
       type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
+      image: "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/381.png",
       appearance_count: 0,
       onCardClick: cardClick,
     },
@@ -228,7 +173,7 @@ function App() {
       id: 4,
       name: "Rayquaza",
       type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
+      image: "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/384.png",
       appearance_count: 0,
       onCardClick: cardClick,
     },
@@ -236,7 +181,7 @@ function App() {
       id: 5,
       name: "Rayquaza",
       type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
+      image: "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/385.png",
       appearance_count: 0,
       onCardClick: cardClick,
     },
@@ -244,55 +189,7 @@ function App() {
       id: 6,
       name: "Rayquaza",
       type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
-      appearance_count: 0,
-      onCardClick: cardClick,
-    },
-   {
-      id: 7,
-      name: "Rayquaza",
-      type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
-      appearance_count: 0,
-      onCardClick: cardClick,
-    },
-   {
-      id: 8,
-      name: "Rayquaza",
-      type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
-      appearance_count: 0,
-      onCardClick: cardClick,
-    },
-   {
-      id: 9,
-      name: "Rayquaza",
-      type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
-      appearance_count: 0,
-      onCardClick: cardClick,
-    },
-   {
-      id: 10,
-      name: "Rayquaza",
-      type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
-      appearance_count: 0,
-      onCardClick: cardClick,
-    },
-   {
-      id: 11,
-      name: "Rayquaza",
-      type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
-      appearance_count: 0,
-      onCardClick: cardClick,
-    },
-   {
-      id: 12,
-      name: "Rayquaza",
-      type: "Dragon",
-      image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/384.png",
+      image: "https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/386.png",
       appearance_count: 0,
       onCardClick: cardClick,
     },
@@ -303,11 +200,21 @@ function App() {
   }
 
   // cards array would be passed down as props to cards grid.
+  const newArray = shuffleOrder(cardsArray);
+  // while (true) {
+  //   const random = getRandomInt(6);
+  //   const currentCard = cardsArray[random];
+  //   if (currentCard.appearance_count < 2) {
+  //       newArray.push(currentCard);
+  //       currentCard.appearance_count += 1;
+  //   }
+  //   if (newArray.length === 12) break;
+  // }
 
   return (
     <>
       {/* <img src={mySprites.front_shiny} alt="The best pokemon on planet Earth my favorite my lovely rayquaza" /> */}
-      <CardsGrid cardsArray={cardsArray}></CardsGrid>
+      <CardsGrid cardsArray={newArray}></CardsGrid>
     </>
   )
 }
