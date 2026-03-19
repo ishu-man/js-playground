@@ -30,7 +30,7 @@ img {
 }
 
 .Card {
-  @apply border-emerald-700 border-3 rounded-md cursor-pointer bg-amber-400 shadow-xs shadow-amber-50 flex-col items-center justify-center;
+  @apply border-emerald-700 border-3 rounded-md cursor-pointer bg-amber-400 shadow-xs shadow-amber-50 flex-col items-center justify-center relative;
 }
 
 .cards-grid {
@@ -39,4 +39,9 @@ img {
 
 .center {
   @apply flex items-center justify-center;
+}
+
+.overlay {
+	/* hidden for hiding it. */
+	@apply absolute bg-emerald-700 cursor-pointer inset-0;
 }

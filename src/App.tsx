@@ -7,11 +7,12 @@ type Card = {
 	name: string;
 	image: string;
 	appearance_count: number;
-	onCardClick: (id: number) => void;
+	onCardClick: (cardData: Card) => void;
 }
 
 type CardsArrayProps = {
 	cardsArray: Array<Card>;
+	visibleCards: Array<Card>;
 }
 
 type Scores = {
@@ -62,7 +63,7 @@ function shuffleOrder(cardsArray: Array<Card>) {
 			}
 		}
 
-	return shuffledCards;
+		return shuffledCards;
 
 	}
 }
@@ -89,7 +90,7 @@ function ScoreCard(scores: Scores){
 	)
 }
 
-function ClickableCard({cardData}: {cardData: Card}){
+function ClickableCard({cardData, cardsArray, visibility}: {cardData: Card, cardsArray: Card[], visibility: boolean}){
 	/**
 	 * Props: cardData of type Card
 	 * Purpose: Returns a card component based on the aforementioned card data
@@ -99,15 +100,22 @@ function ClickableCard({cardData}: {cardData: Card}){
 	 * that the core logic for the event handler is still defined in the parent, and because the handler is a part of the card's own properties
 	 * it was able to be passed as props via CardsGrid and App components.
 	 */
+
+	function toggleVisibility(cardData: Card, setHideButton){
+	}
+	// basically add overlay to the div or not based on the state
+	console.log("This is inside the card's component, visibility for this card is: ", visibility);
+	console.log("The card I was talking about was", cardData.id, cardData.name);
 	return (
-			<button className='Card' onClick={() => cardData.onCardClick(cardData.id)}>
-			<img src={cardData.image} alt="" />
-			<p className='font-bold text-3xl text-black'>{cardData.name}</p>
-			</button>
-			)
+		<button className='Card' onClick={() => cardData.onCardClick(cardData)}>
+		<div className={visibility ? '' : 'overlay'}></div>
+		<img src={cardData.image} alt="" />
+		<p className='font-bold text-3xl text-black'>{cardData.name}</p>
+		</button>
+	)
 }
 
-function CardsGrid({ cardsArray }: CardsArrayProps){
+function CardsGrid({ cardsArray, visibleCards }: CardsArrayProps){
 	/**
 	 * Props: an array of type Card
 	 * Purpose: shuffles the prop array to new randomized array and creates card components based on the new array's data
@@ -119,32 +127,46 @@ function CardsGrid({ cardsArray }: CardsArrayProps){
 	// const shuffledArray = shuffleOrder(cardsArray);
 	// shuffled array is in fact correct.
 	// again, bullet proofing for the first render
-	const mappedComponents = cardsArray.map((currentCard) => {
-			return (
-					// what should the key be? cause it can't be the ID. Should I let react "handle" it?
-					<ClickableCard cardData={currentCard} ></ClickableCard>
-					)
-			})
-	
+	// TODO: Do I want card visibility to be a property of the Card type itself or do I want to control it using the component render?
+	// TODO: Currently, when card is clicked, it's added to visibleCards -> I can then at card render check if the card is in visibleCards and update my visibility on basis of that.
+	const mappedComponents = cardsArray.map((currentCard, index) => {
+		// let's check the visibility of each card here and update it based on that. 
+		console.log("Current card I am dealing with in cardsgrid is: ");
+		console.log(currentCard.name);
+		console.log(visibleCards.includes(currentCard));
+		return (
+			<ClickableCard cardData={currentCard} cardsArray={cardsArray} visibility={visibleCards.includes(currentCard)} key={`${currentCard.id}${index}`}></ClickableCard>
+		)
+	})
+
 	return (
-			<div className="center">
-			<div className="cards-grid">
-				{mappedComponents}
-			</div>
-			</div>
-			)
-	
+		<div className="center">
+		<div className="cards-grid">
+		{mappedComponents}
+		</div>
+		</div>
+	)
+
 }
 
 
 function App() {
 
-	function cardClick(id: number){
-		window.alert(`Clicked element ID: ${id}`);
-	}
-
 	const [cardsArray, setCardsArray] = useState<Card[]>([]);
+	const [visibleCards, setVisibleCards] = useState<Card[]>([]);
+	// visible cards is actually intended for use of the scoreboard
 	// this creates 6 empty cards in the current cards array.
+	// the intention here is to add a card to the visible cards array and then based on the values there hide all cards or show only two
+	// hide all would be used when a miss is encountered and show both would be used when a point is encountered 
+	function cardClick(cardData: Card) {
+		setVisibleCards(previousCards => {
+				if (previousCards.length < 2) {
+					// add new card to visibleCards
+					return [...previousCards, cardData];
+				}
+				return previousCards;
+		});
+	}
 
 	useEffect(() => {
 		const myPokemonArray = [384, 722, 382, 383, 131, 389];
@@ -166,15 +188,14 @@ function App() {
 		}
 
 		fetchData();
-
 	}, []);
 
-return (
+	return (
 		<>
 		{/* <img src={mySprites.front_shiny} alt="The best pokemon on planet Earth my favorite my lovely rayquaza" /> */}
-		<CardsGrid cardsArray={cardsArray}></CardsGrid>
+		<CardsGrid cardsArray={cardsArray} visibleCards={visibleCards}></CardsGrid>
 		</>
-		)
+	)
 }
 
 export default App;
