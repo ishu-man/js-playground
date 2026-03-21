@@ -8,6 +8,7 @@ type Card = {
 	image: string;
 	appearance_count: number;
 	onCardClick: (cardData: Card) => void;
+	uniqueIdentifier: number;
 }
 
 type CardsArrayProps = {
@@ -56,15 +57,20 @@ function shuffleOrder(cardsArray: Array<Card>) {
 				const currentCard: Card = unshuffledCards[random];
 				const appCount: number = currentCard.appearance_count;
 				if (appCount !== 2) {
+					//currentCard.uniqueIdentifier = 100 + currentCard.id;
 					shuffledCards.push(currentCard);
 					currentCard.appearance_count += 1;
 				}
 				if (shuffledCards.length === 12) break;
 			}
 		}
-
-		return shuffledCards;
-
+		const finalShuffled = shuffledCards.map((currentCard: Card, index: number) => {
+			return {
+				...currentCard,
+				uniqueIdentifier: 100 + index,
+			}
+		})
+		return finalShuffled;
 	}
 }
 
@@ -129,13 +135,14 @@ function CardsGrid({ cardsArray, visibleCards }: CardsArrayProps){
 	// again, bullet proofing for the first render
 	// TODO: Do I want card visibility to be a property of the Card type itself or do I want to control it using the component render?
 	// TODO: Currently, when card is clicked, it's added to visibleCards -> I can then at card render check if the card is in visibleCards and update my visibility on basis of that.
+	// TODO: WHEN A CARD IS CLICKED, ITS SIBLING GETS REVEALED TOO. .includes() has NO WAY of distinguishing the two cards!
 	const mappedComponents = cardsArray.map((currentCard, index) => {
 		// let's check the visibility of each card here and update it based on that. 
 		console.log("Current card I am dealing with in cardsgrid is: ");
-		console.log(currentCard.name);
+		console.log(currentCard.name, currentCard.uniqueIdentifier);
 		console.log(visibleCards.includes(currentCard));
 		return (
-			<ClickableCard cardData={currentCard} cardsArray={cardsArray} visibility={visibleCards.includes(currentCard)} key={`${currentCard.id}${index}`}></ClickableCard>
+			<ClickableCard cardData={currentCard} cardsArray={cardsArray} visibility={visibleCards.includes(currentCard)} ></ClickableCard>
 		)
 	})
 
@@ -153,20 +160,67 @@ function CardsGrid({ cardsArray, visibleCards }: CardsArrayProps){
 function App() {
 
 	const [cardsArray, setCardsArray] = useState<Card[]>([]);
+	const [clickedCards, setClickedCards] = useState<Card[]>([]);
 	const [visibleCards, setVisibleCards] = useState<Card[]>([]);
+	//let visibleCards = new Array<Card>();
+	// the intention is to calculate visible cards from clicked cards.
+
+
+	// maybe I could have a clicked cards state and would calculate visible cards on basis of it?
 	// visible cards is actually intended for use of the scoreboard
 	// this creates 6 empty cards in the current cards array.
 	// the intention here is to add a card to the visible cards array and then based on the values there hide all cards or show only two
 	// hide all would be used when a miss is encountered and show both would be used when a point is encountered 
 	function cardClick(cardData: Card) {
-		setVisibleCards(previousCards => {
-				if (previousCards.length < 2) {
-					// add new card to visibleCards
-					return [...previousCards, cardData];
-				}
-				return previousCards;
+		setClickedCards(previousCards => {
+			// append latest card to clicked cards.
+				return [...previousCards, cardData];
 		});
+		setVisibleCards(previousVisible => [...previousVisible, cardData]);
 	}
+
+	useEffect(() => {
+		/*
+		* Some comments about this useEffect:
+		* React can be thought of as a DFA. You have a state in the UI and you have another state in the UI. A component is only a snapshot
+		* of that moment in reality - given state A, return UI A. It's pure determinism.
+		* This determinism is what "isolates" it from "the outisde world". This is the reason effects are required. This foreign entity that you
+		* sync your UI with can be a clock chip on a user's motherboard or even external API systems. Effects essentially 'break' the isolation.
+		* 
+		* Cleanup is even more interesting.
+		*  
+		*/
+	let timeoutID: number;
+	 if (visibleCards.length % 2 === 0 && visibleCards.length !== 0) {
+		 timeoutID = setTimeout(() => {
+			 // disable card clicking when there are an even number of cards on screen? 
+			 // actually, map over the cards and identify whether two cards have the same id. If they do, add them to visible cards permanently.
+			setVisibleCards(previousVisible => {
+				let i = previousVisible.length - 1;
+				let j = previousVisible.length - 2;
+				const newVisibleCards = new Array<Card>();
+
+				while (previousVisible[i] && previousVisible[j]) {
+					if (previousVisible[i].id === previousVisible[j].id) {
+
+						newVisibleCards.push(previousVisible[i]);
+						newVisibleCards.push(previousVisible[j]);
+						}
+					i -= 2;
+					j -= 2;
+					//else continue;
+				}
+				// end of while.
+				return newVisibleCards;
+			})
+		 }, 500);
+	 }
+
+		return () => {
+	     window.clearTimeout(timeoutID);
+	   }
+	}, [visibleCards])
+	
 
 	useEffect(() => {
 		const myPokemonArray = [384, 722, 382, 383, 131, 389];
@@ -179,6 +233,7 @@ function App() {
 					image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${value}.png`,
 					appearance_count: 0,
 					onCardClick: cardClick,
+					uniqueIdentifier: 100 + index,
 				}
 				return currentCard;
 			}));
