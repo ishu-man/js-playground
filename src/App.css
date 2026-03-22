@@ -45,3 +45,7 @@ img {
 	/* hidden for hiding it. */
 	@apply absolute bg-emerald-700 cursor-pointer inset-0;
 }
+
+.hidden {
+	@apply hidden;
+}

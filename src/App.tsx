@@ -1,6 +1,5 @@
 import './App.css'
 import { useState, useEffect } from 'react';
-// objective: find the infinite loop and kill it.
 
 type Card = {
 	id: number;
@@ -16,11 +15,6 @@ type CardsArrayProps = {
 	visibleCards: Array<Card>;
 }
 
-type Scores = {
-	current_score: number;
-	misses: number;
-}
-
 async function getPokemonSprite (pokemonID: number){
 	const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonID}/`, {
 		method: "GET"
@@ -33,6 +27,27 @@ function getRandomInt(max: number) {
 	return Math.floor(Math.random() * max);
 }
 
+function returnPoints(cardsArray: Array<Card>){
+	// should only be called for even length of array.
+	const length = cardsArray.length;
+	if (length % 2 !== 0) return;
+	else if (length <= 24) {
+		return (100 - (Math.floor((length-12) / 2) * 5));
+	}
+	else {
+		return (70- (Math.floor((length-24) / 2) * 10));
+	}
+}
+
+function checkMiss(lastCard: Card, secondLastCard: Card) {
+	// returns whether the most recent pair in cardsArray is different or not. 
+	// if (length % 2 !== 0) return; this should be outside this func.
+	const condition = (lastCard.id === secondLastCard.id) && (lastCard.uniqueIdentifier !== secondLastCard.uniqueIdentifier)
+	// if condition is true, it's a matched pair as id's are same but identifiers are different -> two different 'siblings' were matched!
+	if (condition) return false; 
+	return true;
+}
+
 function shuffleOrder(cardsArray: Array<Card>) {
 	// effects work AFTER initial render.
 	/**
@@ -42,12 +57,9 @@ function shuffleOrder(cardsArray: Array<Card>) {
 	 * 2. There should be a random order of the 12 cards in that array.
 	 */
 	// initially there is no cardsArray so I will have to bullet proof all of this from the first render
-	console.log("I am inside of shuffleOrder");
 	//const unshuffledCards = JSON.parse(JSON.stringify(cardsArray));
 	const unshuffledCards = cardsArray.map(card => ({...card}));
 	// we take a deep copy here and modify the object properties inside of that.
-
-	console.log(unshuffledCards);
 
 	if (unshuffledCards.length) {
 		const shuffledCards = new Array<Card>();
@@ -74,7 +86,22 @@ function shuffleOrder(cardsArray: Array<Card>) {
 	}
 }
 
-function ScoreCard(scores: Scores){
+function returnMisses(clickedCards: Card[]) {
+	let misses: number = 0;
+	for (let i = 0; i <= clickedCards.length - 2; i+=2) {
+		for (let j = 1; j <= clickedCards.length - 1; j += 2) {
+				const currentCard = clickedCards[j];
+				const previousCard = clickedCards[i];
+				console.log("Misses right now is: ", misses);
+				console.log("Current card is: ", currentCard);
+				console.log("Previous card is: ", previousCard);
+				if (checkMiss(currentCard, previousCard)) misses += 1;
+		}	
+	}
+	return misses;
+}
+
+function ScoreCard({clickedCards, visibleCards, missesCount}: {clickedCards: Card[], visibleCards: Card[], missesCount: number}){
 	/**
 	 * should contain current_scores and misses count.
 	 * this component should communicate with the cards component 
@@ -82,16 +109,17 @@ function ScoreCard(scores: Scores){
 	 * rough props: clickedCards, originalCards
 	 * this should give you the currentScore and the currentMisse
 	 */
-
-	// raw feed below:
-	// I would need a way to keep track of the card IDs (vague blackbox right now) and somehow "link" 
-	// those two card IDs together so that they represent a "pair". If I do that I can "record" the user clicking 
-	// on a card with one of these IDs and then record subsequent clicks from the user. If the user clicks on a card and 
-	// that is not in this "recorded" data structure (list) I can increment misses by 1. If it is I can increment score by 1.
+	const endCondition: boolean = (visibleCards.length === 12);
+	const points = returnPoints(clickedCards);
+	// setMisses(previousMissesCount => {
+	// 	if (clickedCards.length % 2 === 0 && clickedCards.length !== 0) return (returnMisses(clickedCards));
+	// 	return previousMissesCount;
+	// })
+	// this causes an infinite render loop
 	return (
 		<div className="score-card">
-		<p>Score: {scores.current_score}</p>
-		<p>Misses: {scores.misses}</p>
+		<p>Misses: {missesCount}</p>
+		<p className={endCondition ? "points" : "hidden"}>Points: {points}</p>
 		</div>
 	)
 }
@@ -110,9 +138,7 @@ function ClickableCard({cardData, cardsArray, visibility}: {cardData: Card, card
 	function toggleVisibility(cardData: Card, setHideButton){
 	}
 	// basically add overlay to the div or not based on the state
-	console.log("This is inside the card's component, visibility for this card is: ", visibility);
-	console.log("The card I was talking about was", cardData.id, cardData.name);
-	return (
+		return (
 		<button className='Card' onClick={() => cardData.onCardClick(cardData)}>
 		<div className={visibility ? '' : 'overlay'}></div>
 		<img src={cardData.image} alt="" />
@@ -138,11 +164,9 @@ function CardsGrid({ cardsArray, visibleCards }: CardsArrayProps){
 	// TODO: WHEN A CARD IS CLICKED, ITS SIBLING GETS REVEALED TOO. .includes() has NO WAY of distinguishing the two cards!
 	const mappedComponents = cardsArray.map((currentCard, index) => {
 		// let's check the visibility of each card here and update it based on that. 
-		console.log("Current card I am dealing with in cardsgrid is: ");
-		console.log(currentCard.name, currentCard.uniqueIdentifier);
-		console.log(visibleCards.includes(currentCard));
-		return (
-			<ClickableCard cardData={currentCard} cardsArray={cardsArray} visibility={visibleCards.includes(currentCard)} ></ClickableCard>
+		// update: the key could be set as the uniqueIdentifider.
+			return (
+			<ClickableCard cardData={currentCard} cardsArray={cardsArray} visibility={visibleCards.includes(currentCard)} key={currentCard.uniqueIdentifier}></ClickableCard>
 		)
 	})
 
@@ -162,21 +186,29 @@ function App() {
 	const [cardsArray, setCardsArray] = useState<Card[]>([]);
 	const [clickedCards, setClickedCards] = useState<Card[]>([]);
 	const [visibleCards, setVisibleCards] = useState<Card[]>([]);
+	const [missesCount, setMissesCount] = useState(0);
 	//let visibleCards = new Array<Card>();
 	// the intention is to calculate visible cards from clicked cards.
 
 
 	// maybe I could have a clicked cards state and would calculate visible cards on basis of it?
-	// visible cards is actually intended for use of the scoreboard
+	// visible cards is actually intended for use of the scoreboard id same uniq. different
 	// this creates 6 empty cards in the current cards array.
 	// the intention here is to add a card to the visible cards array and then based on the values there hide all cards or show only two
 	// hide all would be used when a miss is encountered and show both would be used when a point is encountered 
 	function cardClick(cardData: Card) {
 		setClickedCards(previousCards => {
 			// append latest card to clicked cards.
+				console.log("Cards clicked: ");
+				console.log([...previousCards, cardData]);
 				return [...previousCards, cardData];
 		});
-		setVisibleCards(previousVisible => [...previousVisible, cardData]);
+		setVisibleCards(previousVisible => {
+			console.log("Visible cards: ");
+			console.log([...previousVisible, cardData]);
+			// when visible cards is a multiple of two, I can check whether both cards are the same and increment score?
+			return ([...previousVisible, cardData]);
+		});
 	}
 
 	useEffect(() => {
@@ -191,7 +223,7 @@ function App() {
 		*  
 		*/
 	let timeoutID: number;
-	 if (visibleCards.length % 2 === 0 && visibleCards.length !== 0) {
+	 if (visibleCards.length % 2 === 0) {
 		 timeoutID = setTimeout(() => {
 			 // disable card clicking when there are an even number of cards on screen? 
 			 // actually, map over the cards and identify whether two cards have the same id. If they do, add them to visible cards permanently.
@@ -214,8 +246,8 @@ function App() {
 				return newVisibleCards;
 			})
 		 }, 500);
+		 // end if
 	 }
-
 		return () => {
 	     window.clearTimeout(timeoutID);
 	   }
@@ -237,18 +269,31 @@ function App() {
 				}
 				return currentCard;
 			}));
-			console.log("Example cards are: ");
-			console.log(exampleCards);
 			setCardsArray(shuffleOrder(exampleCards));
 		}
 
 		fetchData();
 	}, []);
 
+	useEffect(() => {
+		async function updateMisses(clickedCards: Card[]){
+			setMissesCount(prevMisses => {
+				if (clickedCards.length % 2 === 0 && clickedCards.length !== 0) {
+					const currentCard = clickedCards[clickedCards.length - 1];
+					const previousCard = clickedCards[clickedCards.length - 2];
+					if (checkMiss(currentCard, previousCard)) return prevMisses + 1;
+				}
+				return prevMisses;
+			});
+		}
+		updateMisses(clickedCards);
+	}, [clickedCards])
+
 	return (
 		<>
 		{/* <img src={mySprites.front_shiny} alt="The best pokemon on planet Earth my favorite my lovely rayquaza" /> */}
 		<CardsGrid cardsArray={cardsArray} visibleCards={visibleCards}></CardsGrid>
+		<ScoreCard clickedCards={clickedCards} visibleCards={visibleCards} missesCount={missesCount}></ScoreCard>
 		</>
 	)
 }
