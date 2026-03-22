@@ -48,6 +48,16 @@ function checkMiss(lastCard: Card, secondLastCard: Card) {
 	return true;
 }
 
+function returnMisses(clickedCards: Card[]) {
+	let misses: number = 0;
+	for (let i = 0; i < clickedCards.length - 1; i+=2) {
+		const currentCard = clickedCards[i+1];
+		const previousCard = clickedCards[i];
+		if (checkMiss(currentCard, previousCard)) misses += 1;
+	}
+	return misses;
+}
+
 function shuffleOrder(cardsArray: Array<Card>) {
 	// effects work AFTER initial render.
 	/**
@@ -85,22 +95,6 @@ function shuffleOrder(cardsArray: Array<Card>) {
 		return finalShuffled;
 	}
 }
-
-function returnMisses(clickedCards: Card[]) {
-	let misses: number = 0;
-	for (let i = 0; i <= clickedCards.length - 2; i+=2) {
-		for (let j = 1; j <= clickedCards.length - 1; j += 2) {
-				const currentCard = clickedCards[j];
-				const previousCard = clickedCards[i];
-				console.log("Misses right now is: ", misses);
-				console.log("Current card is: ", currentCard);
-				console.log("Previous card is: ", previousCard);
-				if (checkMiss(currentCard, previousCard)) misses += 1;
-		}	
-	}
-	return misses;
-}
-
 function ScoreCard({clickedCards, visibleCards, missesCount}: {clickedCards: Card[], visibleCards: Card[], missesCount: number}){
 	/**
 	 * should contain current_scores and misses count.
@@ -186,7 +180,7 @@ function App() {
 	const [cardsArray, setCardsArray] = useState<Card[]>([]);
 	const [clickedCards, setClickedCards] = useState<Card[]>([]);
 	const [visibleCards, setVisibleCards] = useState<Card[]>([]);
-	const [missesCount, setMissesCount] = useState(0);
+	let calculatedMisses = 0;
 	//let visibleCards = new Array<Card>();
 	// the intention is to calculate visible cards from clicked cards.
 
@@ -275,25 +269,13 @@ function App() {
 		fetchData();
 	}, []);
 
-	useEffect(() => {
-		async function updateMisses(clickedCards: Card[]){
-			setMissesCount(prevMisses => {
-				if (clickedCards.length % 2 === 0 && clickedCards.length !== 0) {
-					const currentCard = clickedCards[clickedCards.length - 1];
-					const previousCard = clickedCards[clickedCards.length - 2];
-					if (checkMiss(currentCard, previousCard)) return prevMisses + 1;
-				}
-				return prevMisses;
-			});
-		}
-		updateMisses(clickedCards);
-	}, [clickedCards])
+	calculatedMisses = returnMisses(clickedCards);
 
 	return (
 		<>
 		{/* <img src={mySprites.front_shiny} alt="The best pokemon on planet Earth my favorite my lovely rayquaza" /> */}
 		<CardsGrid cardsArray={cardsArray} visibleCards={visibleCards}></CardsGrid>
-		<ScoreCard clickedCards={clickedCards} visibleCards={visibleCards} missesCount={missesCount}></ScoreCard>
+		<ScoreCard clickedCards={clickedCards} visibleCards={visibleCards} missesCount={calculatedMisses}></ScoreCard>
 		</>
 	)
 }
