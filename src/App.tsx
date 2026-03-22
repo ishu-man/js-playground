@@ -147,11 +147,11 @@ function CardsGrid({ cardsArray, visibleCards }: CardsArrayProps){
 	// TODO: Do I want card visibility to be a property of the Card type itself or do I want to control it using the component render?
 	// TODO: Currently, when card is clicked, it's added to visibleCards -> I can then at card render check if the card is in visibleCards and update my visibility on basis of that.
 	// TODO: WHEN A CARD IS CLICKED, ITS SIBLING GETS REVEALED TOO. .includes() has NO WAY of distinguishing the two cards!
-	const mappedComponents = cardsArray.map((currentCard, index) => {
+	const mappedComponents = cardsArray.map((currentCard) => {
 		// let's check the visibility of each card here and update it based on that. 
 		// update: the key could be set as the uniqueIdentifider.
 			return (
-			<ClickableCard cardData={currentCard} cardsArray={cardsArray} visibility={visibleCards.includes(currentCard)} key={currentCard.uniqueIdentifier}></ClickableCard>
+			<ClickableCard cardData={currentCard} visibility={visibleCards.includes(currentCard)} key={currentCard.uniqueIdentifier}></ClickableCard>
 		)
 	})
 
@@ -254,7 +254,10 @@ function App() {
 				}
 				return currentCard;
 			}));
-			setCardsArray(shuffleOrder(exampleCards));
+			const newCardsArray = shuffleOrder(exampleCards);
+			if (newCardsArray) {
+				setCardsArray(newCardsArray);
+			}
 		}
 
 		fetchData();
