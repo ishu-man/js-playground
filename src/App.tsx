@@ -58,6 +58,10 @@ function returnMisses(clickedCards: Card[]) {
 	return misses;
 }
 
+function capitalize(word: string){
+	return (word[0].toUpperCase() + word.slice(1));
+}
+
 function shuffleOrder(cardsArray: Array<Card>) {
 	// effects work AFTER initial render.
 	/**
@@ -95,30 +99,20 @@ function shuffleOrder(cardsArray: Array<Card>) {
 		return finalShuffled;
 	}
 }
+
 function ScoreCard({clickedCards, visibleCards, missesCount}: {clickedCards: Card[], visibleCards: Card[], missesCount: number}){
-	/**
-	 * should contain current_scores and misses count.
-	 * this component should communicate with the cards component 
-	 * the cards component should give it the data on the last card clicked which this would store in a data sturcture to track the scores
-	 * rough props: clickedCards, originalCards
-	 * this should give you the currentScore and the currentMisse
-	 */
 	const endCondition: boolean = (visibleCards.length === 12);
 	const points = returnPoints(clickedCards);
-	// setMisses(previousMissesCount => {
-	// 	if (clickedCards.length % 2 === 0 && clickedCards.length !== 0) return (returnMisses(clickedCards));
-	// 	return previousMissesCount;
-	// })
-	// this causes an infinite render loop
 	return (
 		<div className="score-card">
 		<p>Misses: {missesCount}</p>
-		<p className={endCondition ? "points" : "hidden"}>Points: {points}</p>
+		<p className="points">Points: {endCondition ? points : 'TBD'}</p>
+		<p className="message"><em>{endCondition ? 'well played!' : ''}</em></p>
 		</div>
 	)
 }
 
-function ClickableCard({cardData, cardsArray, visibility}: {cardData: Card, cardsArray: Card[], visibility: boolean}){
+function ClickableCard({cardData, visibility}: {cardData: Card, visibility: boolean}){
 	/**
 	 * Props: cardData of type Card
 	 * Purpose: Returns a card component based on the aforementioned card data
@@ -128,9 +122,6 @@ function ClickableCard({cardData, cardsArray, visibility}: {cardData: Card, card
 	 * that the core logic for the event handler is still defined in the parent, and because the handler is a part of the card's own properties
 	 * it was able to be passed as props via CardsGrid and App components.
 	 */
-
-	function toggleVisibility(cardData: Card, setHideButton){
-	}
 	// basically add overlay to the div or not based on the state
 		return (
 		<button className='Card' onClick={() => cardData.onCardClick(cardData)}>
@@ -255,7 +246,7 @@ function App() {
 				const APIdata = await getPokemonSprite(value);
 				const currentCard: Card = {
 					id: index,
-					name: APIdata.name,
+					name: capitalize(APIdata.name),
 					image: `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${value}.png`,
 					appearance_count: 0,
 					onCardClick: cardClick,

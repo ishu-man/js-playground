@@ -42,10 +42,17 @@ img {
 }
 
 .overlay {
-	/* hidden for hiding it. */
 	@apply absolute bg-emerald-700 cursor-pointer inset-0;
 }
 
 .hidden {
 	@apply hidden;
+}
+
+.score-card {
+	@apply bg-emerald-950 fixed top-0 px-4 py-4 rounded-md mt-2 ml-2;
+}
+
+.message {
+	@apply animate-pulse transition delay-150;
 }
